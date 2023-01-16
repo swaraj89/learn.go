@@ -8,31 +8,7 @@ import (
 )
 
 func main() {
-	resp, err := http.Get("https://api.github.com/users/swaraj89")
-	if err != nil {
-		log.Fatalf("error: %s", err)
-		// Equivalent code
-		// log.printf("error: %s", err)
-		// os.Exit(1)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("error: %s", resp.Status)
-	}
-
-	fmt.Printf("Content-Type: %s\n", resp.Header.Get("Content-Type"))
-	/* if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
-		log.Fatalf("Error: Can't copy - %s", err)
-	} */
-
-	var r Reply
-	dec := json.NewDecoder(resp.Body)
-	//pointers in go are used for refrence
-	if err := dec.Decode(&r); err != nil {
-		log.Fatalf("error: can't decode - %s", err)
-	}
-	// fmt.Println(r)
-	fmt.Printf("%#v\n", r)
+	fmt.Printf(githubInfo("swaraj89"))
 }
 
 /*  JSON <-> GO
@@ -51,6 +27,38 @@ JSON -> []byte -> Go: json.Unmarshal
   Go -> io.writer -> JSON: Json.Encoder
   Go -> []byte -> JSON: Json.Marshal
 */
+
+// githubinfo returns name and numbe rof public repos for login
+func githubInfo(login string) (string, int, error) {
+	url := "https://api.github.com/users/" + login
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", 0, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", 0, fmt.Errorf("%#v - %s", url, resp.Status)
+	}
+
+	fmt.Printf("Content-Type: %s\n", resp.Header.Get("Content-Type"))
+	/* if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+		log.Fatalf("Error: Can't copy - %s", err)
+	} */
+
+	//annonymous struct
+	var r struct {
+		Name         string
+		Public_Repos int
+	}
+	dec := json.NewDecoder(resp.Body)
+	//pointers in go are used for refrence
+	if err := dec.Decode(&r); err != nil {
+		log.Fatalf("error: can't decode - %s", err)
+	}
+	// fmt.Println(r)
+	// fmt.Printf("%#v\n", r)
+	return r.Name, r.Public_Repos, nil
+}
 
 type Reply struct {
 	Name         string
