@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
 	var s []int                //s is a slice of int
@@ -29,6 +32,15 @@ func main() {
 	}
 
 	fmt.Println("s4", len(s4), cap(s4))
+
+	fmt.Println(concat([]string{"A", "B"}, []string{"C", "D", "E"})) // A B C D E
+
+	vs := []float64{2, 1, 3}
+	fmt.Println(median(vs))
+	vs4 := []float64{2, 1, 3, 4}
+	fmt.Println(median(vs4))
+
+	fmt.Println(median(nil))
 }
 
 func appendInt(s []int, v int) []int {
@@ -44,4 +56,29 @@ func appendInt(s []int, v int) []int {
 
 	s[i] = v
 	return s
+}
+
+func concat(s1, s2 []string) []string {
+	// [TODO] Restrictions: No "for" loops
+	s := make([]string, len(s1)+len(s2))
+	copy(s, s1)
+	copy(s[len(s1):], s2)
+	return s
+}
+
+func median(values []float64) (float64, error) {
+
+	if len(values) == 0 {
+		return 0, fmt.Errorf("median of empty slice")
+	}
+
+	sort.Float64s(values)
+
+	i := len(values) / 2
+	if len(values)%2 == 1 {
+		return values[i], nil
+	}
+
+	v := (values[i-1] + values[i]) / 2
+	return v, nil
 }
